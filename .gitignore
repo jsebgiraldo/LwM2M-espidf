@@ -2,6 +2,7 @@
 *.d
 *.a
 *.elf
+*.bin
 *.map
 build/
 .vscode/
@@ -12,3 +13,4 @@ c_cpp_properties.json
 tasks.json
 settings.json
 
+.cache/Microsoft/DeveloperTools/deviceid

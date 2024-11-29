@@ -1,0 +1,8 @@
+[user]
+	email = jsgiraldod@hotmail.com
+	name = jsebgiraldo
+[credential]
+	helper = "!f() { /root/.vscode-server/bin/f1a4fb101478ce6ec82fe9627c43efbf9e98c813/node /tmp/vscode-remote-containers-3a64aaaa-edb5-4323-8e86-87a2265f0ab0.js git-credential-helper $*; }; f"
+[safe]
+	directory = /root
+	directory = /root
