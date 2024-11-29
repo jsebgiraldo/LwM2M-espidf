@@ -5,6 +5,8 @@ ARG CONTAINER_USER=esp
 ARG USER_UID=1050
 ARG USER_GID=$USER_UID
 
+EXPOSE 80
+
 RUN apt-get update \
   && apt install -y -q \
   cmake \

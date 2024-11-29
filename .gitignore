@@ -4,6 +4,7 @@
 *.elf
 *.bin
 *.map
+*.old
 build/
 .vscode/
 

@@ -32,5 +32,6 @@
 			]
 		}
 	},
-	"runArgs": ["--privileged"]
+	"runArgs": ["--privileged"],
+	"forwardPorts": [8080]
 }
