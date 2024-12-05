@@ -1,0 +1,7 @@
+[submodule "deps/anjay"]
+	path = deps/anjay
+	url = https://github.com/AVSystem/Anjay.git
+[submodule "deps/FreeRTOS-Cellular-Interface"]
+	path = deps/FreeRTOS-Cellular-Interface
+	url = https://github.com/AVSystem/FreeRTOS-Cellular-Interface.git
+	branch = esp32-client-v1.2.0

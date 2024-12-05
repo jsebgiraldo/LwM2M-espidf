@@ -38,9 +38,6 @@ RUN groupadd --gid $USER_GID $CONTAINER_USER \
 
 RUN chmod -R 775 /opt/esp/python_env/
 
-COPY flash.sh .
-RUN chmod +x flash.sh
-
 USER ${CONTAINER_USER}
 ENV USER=${CONTAINER_USER}
 WORKDIR /home/${CONTAINER_USER}

@@ -14,6 +14,11 @@
 #include "esp_netif.h"
 #include "esp_eth.h"
 
+#include <nvs_flash.h>
+
+#include "anjay_config.h"
+
+
 static const char *TAG = "qemu-esp32";
 
 /* An HTTP GET handler */
@@ -56,6 +61,8 @@ static const httpd_uri_t hello = {
     .user_ctx  = "Hello World!"
 };
 
+
+
 static httpd_handle_t start_webserver(void)
 {
     httpd_handle_t server;
@@ -78,6 +85,35 @@ static httpd_handle_t start_webserver(void)
 static esp_eth_handle_t eth_handle = NULL;
 static esp_netif_t *eth_netif = NULL;
 
+
+
+
+static void
+log_handler(avs_log_level_t level, const char *module, const char *msg) {
+    esp_log_level_t esp_level = ESP_LOG_NONE;
+    switch (level) {
+    case AVS_LOG_QUIET:
+        esp_level = ESP_LOG_NONE;
+        break;
+    case AVS_LOG_ERROR:
+        esp_level = ESP_LOG_ERROR;
+        break;
+    case AVS_LOG_WARNING:
+        esp_level = ESP_LOG_WARN;
+        break;
+    case AVS_LOG_INFO:
+        esp_level = ESP_LOG_INFO;
+        break;
+    case AVS_LOG_DEBUG:
+        esp_level = ESP_LOG_DEBUG;
+        break;
+    case AVS_LOG_TRACE:
+        esp_level = ESP_LOG_VERBOSE;
+        break;
+    }
+    ESP_LOG_LEVEL_LOCAL(esp_level, "anjay", "%s", msg);
+}
+
 static void event_handler(void *arg, esp_event_base_t event_base,
                           int32_t event_id, void *event_data)
 {
@@ -87,8 +123,12 @@ static void event_handler(void *arg, esp_event_base_t event_base,
     }
     if (event_base == IP_EVENT)
         if (event_id == IP_EVENT_ETH_GOT_IP)
+        {
+
+        }
 		return;
 }
+
 void register_ethernet(void)
 {
     ESP_ERROR_CHECK(esp_netif_init());
@@ -112,13 +152,24 @@ void register_ethernet(void)
 
 }
 
+
+
 void app_main(void)
 {
+    ESP_ERROR_CHECK(nvs_flash_init());
+
     /* Initialize ethernet dp83848 / openeth for use in qemu */
     register_ethernet();
 
     /* Start the server for the first time */
     start_webserver();
+
+    avs_log_set_handler(log_handler);
+    avs_log_set_default_level(AVS_LOG_TRACE);
+
+    anjay_init();
+    xTaskCreate(&anjay_task, "anjay_task", 16384, NULL, 5, NULL);
+
 
     printf("\n =======================================================\n");
     printf(" |               HTTP SERVER ON 80                     |\n");

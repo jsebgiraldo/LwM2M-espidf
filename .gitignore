@@ -8,6 +8,8 @@
 build/
 .vscode/
 
+*.Identifier
+
 **/.vscode
 **/.vscode/settings.json
 c_cpp_properties.json

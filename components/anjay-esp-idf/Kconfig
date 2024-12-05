@@ -1,0 +1,361 @@
+# Copyright 2023-2024 AVSystem <avsystem@avsystem.com>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+menu "Anjay library configuration"
+
+menuconfig ANJAY_ESP_IDF_WITH_BG96_SUPPORT
+    bool "Enable support for external BG96 module"
+    default n
+
+if ANJAY_ESP_IDF_WITH_BG96_SUPPORT
+    menu "BG96 module configuration"
+
+        config ANJAY_BG96_UART_PORT_NUMBER
+            int "UART port number"
+            default 0
+
+        config ANJAY_BG96_TX_PIN
+            int "UART Tx pin"
+            default 0
+
+        config ANJAY_BG96_RX_PIN
+            int "UART Rx pin"
+            default 0
+    endmenu
+
+    choice ANJAY_CELLULAR_PDN_AUTH_TYPE
+        prompt "PDN authentication type"
+        default ANJAY_CELLULAR_PDN_AUTH_TYPE_NONE
+
+        config ANJAY_CELLULAR_PDN_AUTH_TYPE_NONE
+        bool "No authentication"
+
+        config ANJAY_CELLULAR_PDN_AUTH_TYPE_PAP
+        bool "PAP"
+
+        config ANJAY_CELLULAR_PDN_AUTH_TYPE_CHAP
+        bool "CHAP"
+
+        config ANJAY_CELLULAR_PDN_AUTH_TYPE_PAP_OR_CHAP
+        bool "PAP or CHAP"
+    endchoice
+
+    config ANJAY_CELLULAR_APN
+        string "APN name"
+        default "Cellular APN"
+
+    config ANJAY_CELLULAR_PDN_USERNAME
+        string "PDN username" if !ANJAY_CELLULAR_PDN_AUTH_TYPE_NONE
+        default ""
+
+    config ANJAY_CELLULAR_PDN_PASSWORD
+        string "PDN password" if !ANJAY_CELLULAR_PDN_AUTH_TYPE_NONE
+        default ""
+endif
+
+menuconfig ANJAY_LIBRARY_WITH_LOGS
+    bool "Enable logging in Anjay, avs_commons and avs_coap"
+    default y
+    help
+        If this flag is disabled, no logging is compiled into the binary at all.
+
+    config ANJAY_WITH_LOGS
+        bool "Enable logging in Anjay."
+        default y
+        depends on ANJAY_LIBRARY_WITH_LOGS
+
+    config WITH_AVS_COAP_LOGS
+        bool "Enable logging in avs_coap."
+        default y
+        depends on ANJAY_LIBRARY_WITH_LOGS
+
+    config AVS_COMMONS_WITH_INTERNAL_LOGS
+        bool "Enable logging in avs_commons."
+        default y
+        depends on ANJAY_LIBRARY_WITH_LOGS
+
+    menuconfig ANJAY_LIBRARY_WITH_TRACE_LOGS
+        bool "Enable TRACE-level logs in Anjay, avs_commons and avs_coap."
+        default y
+        depends on ANJAY_LIBRARY_WITH_LOGS
+
+        config ANJAY_WITH_TRACE_LOGS
+            bool "Enable TRACE-level logs in Anjay."
+            default y
+            depends on ANJAY_LIBRARY_WITH_TRACE_LOGS && ANJAY_WITH_LOGS
+
+        config WITH_AVS_COAP_TRACE_LOGS
+            bool "Enable TRACE-level logs in avs_coap."
+            default y
+            depends on ANJAY_LIBRARY_WITH_TRACE_LOGS && WITH_AVS_COAP_LOGS
+
+        config AVS_COMMONS_WITH_INTERNAL_TRACE
+            bool "Enable TRACE-level logs in avs_commons."
+            default y
+            depends on ANJAY_LIBRARY_WITH_TRACE_LOGS && AVS_COMMONS_WITH_INTERNAL_LOGS
+
+    config ANJAY_WITH_MICRO_LOGS
+        bool "Enable the \"micro logs\" feature."
+        default n
+        help
+            Replaces all occurrences of the <c>AVS_DISPOSABLE_LOG()</c> macro with single
+            space strings. This is intended to reduce the size of the compiled code, by
+            stripping it of almost all log string data.
+
+            Note that this setting will propagate both to avs_commons components
+            themselves (as all its internal logs make use of <c>AVS_DISPOSABLE_LOG()</c>)
+            and the user code that uses it.
+        depends on ANJAY_LIBRARY_WITH_LOGS
+
+config ANJAY_WITH_ACCESS_CONTROL
+    bool "Enable core support for Access Control mechanisms."
+    default n
+    help
+        Requires separate implementation of the Access Control object itself.
+        Either the implementation available as part of
+        ANJAY_WITH_MODULE_ACCESS_CONTROL, or a custom application-provided one
+        may be used.
+
+config ANJAY_WITH_ATTR_STORAGE
+    bool "Enable attr_storage module"
+    default y
+
+config ANJAY_WITH_DOWNLOADER
+    bool "Enable support for the anjay_download() API."
+    default y
+
+config ANJAY_WITH_COAP_DOWNLOAD
+    bool "Enable support for CoAP(S) downloads."
+    default y
+    depends on ANJAY_WITH_DOWNLOADER
+
+config ANJAY_WITH_HTTP_DOWNLOAD
+    bool "Enable support for HTTP(S) downloads."
+    default n
+    depends on ANJAY_WITH_DOWNLOADER
+
+config ANJAY_WITH_BOOTSTRAP
+    bool "Enable support for the LwM2M Bootstrap Interface."
+    default y
+
+config ANJAY_WITH_DISCOVER
+    bool "Enable support for the LwM2M Discover operation."
+    default y
+
+config ANJAY_WITH_OBSERVE
+    bool "Enable support for the LwM2M Information Reporting interface."
+    default y
+    help
+        Information Reporting interface includes Observe and Notify operations
+
+config ANJAY_WITH_OBSERVE_PERSISTENCE
+    bool "Enable support for observation persistence"
+    default n
+    depends on ANJAY_WITH_OBSERVE
+
+config ANJAY_WITH_NET_STATS
+    bool "Enable support for measuring amount of LwM2M traffic."
+    default n
+
+config ANJAY_WITH_COMMUNICATION_TIMESTAMP_API
+    bool "Enable support for communication timestamp API."
+    default n
+    help
+        Enable anjay_get_server_last_registration_time(),
+        anjay_get_server_next_update_time() and
+        anjay_get_server_last_communication_time() functions.
+
+config ANJAY_WITH_OBSERVATION_STATUS
+    bool "Enable support for the anjay_resource_observation_status() API."
+    default y
+
+config ANJAY_MAX_OBSERVATION_SERVERS_REPORTED_NUMBER
+    int "Maximum number of listed servers that observe a given Resource."
+    default 0
+    depends on ANJAY_WITH_OBSERVATION_STATUS
+    help
+        Maximum number of servers observing a given Resource listed by
+        anjay_resource_observation_status() function.
+
+config ANJAY_WITH_THREAD_SAFETY
+    bool "Enable guarding of all accesses to anjay_t with a mutex."
+    default y
+
+if !ANJAY_ESP_IDF_WITH_BG96_SUPPORT
+    config ANJAY_WITH_EVENT_LOOP
+        bool "Enable standard implementation of an event loop"
+        default y
+endif
+
+config ANJAY_WITH_LWM2M11
+    bool "Enable support for features new to LwM2M protocol version 1.1."
+    default y
+
+config ANJAY_WITH_SEND
+    bool "Enable support for the LwM2M Send operation."
+    default y
+    depends on ANJAY_WITH_LWM2M11
+    help
+        Requires either SENML_JSON or CBOR format to be enabled
+
+
+config ANJAY_WITHOUT_QUEUE_MODE_AUTOCLOSE
+    bool "Disable automatic closing of server connection sockets after MAX_TRANSMIT_WAIT of inactivity."
+    default n
+
+config ANJAY_WITH_LEGACY_CONTENT_FORMAT_SUPPORT
+    bool "Enable support for legacy CoAP Content-Format values"
+    default n
+    help
+        Enable support for legacy CoAP Content-Format numerical values 1541-1543 that
+        have been used before final LwM2M TS 1.0.
+
+config ANJAY_WITH_LWM2M_JSON
+    bool "Enable support for JSON format as specified in LwM2M TS 1.0."
+    default n
+
+config ANJAY_WITHOUT_TLV
+    bool "Disable support for TLV format as specified in LwM2M TS 1.0."
+    default n
+
+config ANJAY_WITHOUT_PLAINTEXT
+    bool "Disable support for Plain Text format as specified in LwM2M TS 1.0. and 1.1"
+    default n
+
+config ANJAY_WITHOUT_DEREGISTER
+    bool "Disable use of the Deregister message."
+    default n
+
+if ANJAY_ESP_IDF_WITH_BG96_SUPPORT
+    config ANJAY_WITHOUT_IP_STICKINESS
+        bool "Disable support for \"IP stickiness\""
+        default y
+        help
+            "IP stickiness" is a preference of the same IP address when reconnecting to
+            a server using a domain name.
+endif
+
+config ANJAY_WITH_SENML_JSON
+    bool "Enable support for SenML JSON format, as specified in LwM2M TS 1.1."
+    default y
+    depends on ANJAY_WITH_LWM2M11
+
+config ANJAY_WITH_CBOR
+    bool "Enable support for CBOR and SenML CBOR formats, as specified in LwM2M TS 1.1."
+    default y
+    depends on ANJAY_WITH_LWM2M11
+
+
+config ANJAY_WITH_CON_ATTR
+    bool "Enable support for custom \"con\" attribute that controls Confirmable notifications."
+    default n
+    depends on ANJAY_WITH_OBSERVE
+
+config ANJAY_WITH_SECURITY_STRUCTURED
+    bool "Enable support for handling security credentials in the data model using structured avs_crypto types."
+    default n
+
+config ANJAY_MAX_PK_OR_IDENTITY_SIZE
+    int "Maximum size of the \"Public Key or Identity\""
+    default 256
+    help
+        Maximum size in bytes supported for the \"Public Key or Identity\" resource
+        in the LwM2M Security object.
+
+config ANJAY_MAX_SECRET_KEY_SIZE
+    int "Maximum size of the \"Secret Key\""
+    default 128
+    help
+        Maximum size in bytes supported for the \"Secret Key\" resource in the LwM2M
+        Security Object.
+
+config ANJAY_MAX_DOUBLE_STRING_SIZE
+    int "Maximum length supported for stringified floating-point values."
+    default 64
+    help
+        Used when parsing plaintext and SenML JSON content formats - when parsing a
+        floating-point value, any string of length equal or greater than this setting
+        will automatically be considered invalid, even if it could in theory be
+        parsed as a valid number.
+
+config ANJAY_MAX_URI_SEGMENT_SIZE
+    int "Maximum length supported for a single Uri-Path or Location-Path segment."
+    default 64
+    help
+        When handling incoming CoAP messages, any Uri-Path or Location-Path option of
+        length equal or greater than this setting will be considered invalid.
+
+config ANJAY_MAX_URI_QUERY_SEGMENT_SIZE
+    int "Maximum length supported for a single Uri-Query segment."
+    default 64
+    help
+        When handling incoming CoAP messages, any Uri-Query option of length equal or
+        greater than this setting will be considered invalid.
+
+config ANJAY_DTLS_SESSION_BUFFER_SIZE
+    int "DTLS buffer size"
+    default 1024
+    help
+        Size of buffer allocated for storing DTLS session state when connection is
+        not in use (e.g. during queue mode operation).
+
+config ANJAY_WITH_MODULE_ACCESS_CONTROL
+    bool "Enable access control module"
+    default n
+    depends on ANJAY_WITH_ACCESS_CONTROL
+
+config ANJAY_WITH_MODULE_SECURITY
+    bool "Enable security module"
+    default y
+
+
+config ANJAY_WITH_MODULE_SERVER
+    bool "Enable server module"
+    default y
+
+config ANJAY_WITH_MODULE_FW_UPDATE
+    bool "Enable fw_update module"
+    default y
+    depends on ANJAY_WITH_DOWNLOADER
+
+config ANJAY_WITH_MODULE_ADVANCED_FW_UPDATE
+    bool "Enable advanced_fw_update module"
+    default n
+    depends on ANJAY_WITH_DOWNLOADER
+
+config ANJAY_WITHOUT_MODULE_FW_UPDATE_PUSH_MODE
+    bool "Disable support for PUSH mode Firmware Update."
+    depends on ANJAY_WITH_MODULE_FW_UPDATE
+
+config ANJAY_WITH_MODULE_SW_MGMT
+    bool "Enable sw_mgmt module (implementation of the Software Management object)"
+    default n
+
+config ANJAY_WITH_MODULE_IPSO_OBJECTS
+    bool "Enable IPSO objects implementation"
+    default y
+
+
+config ANJAY_WITH_MODULE_FACTORY_PROVISIONING
+    bool "Enable factory provisioning module"
+    default n
+    depends on ANJAY_WITH_CBOR
+
+if !ANJAY_ESP_IDF_WITH_BG96_SUPPORT
+    config AVS_COMMONS_NET_WITH_POSIX_AVS_SOCKET
+        bool "Enables the default implementation of avs_net TCP and UDP sockets"
+        default y
+endif
+
+endmenu
