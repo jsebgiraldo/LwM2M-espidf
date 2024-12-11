@@ -2,17 +2,18 @@
 #include <avsystem/commons/avs_log.h>
 #include <avsystem/commons/avs_sched.h>
 
+#include <anjay/ipso_objects.h>
+#include <anjay/ipso_objects_v2.h>
+
 #include <anjay/anjay.h>
 #include <anjay/attr_storage.h>
 #include <anjay/core.h>
 #include <anjay/security.h>
 #include <anjay/server.h>
 
-
 #include "firmware_update.h"
 
 #include "objects/objects.h"
-
 
 #define MAIN_PREFERRED_TRANSPORT "U"
 
@@ -31,6 +32,7 @@ static const anjay_dm_object_def_t **DEVICE_OBJ;
 
 static anjay_t *anjay;
 static avs_sched_handle_t connection_status_job_handle;
+static avs_sched_handle_t sensors_job_handle;
 
 
 void anjay_init(void);

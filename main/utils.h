@@ -22,3 +22,4 @@ typedef struct {
 } device_id_t;
 
 int get_device_id(device_id_t *out_id);
+int8_t datahex(char* string, uint8_t *data, int8_t len);

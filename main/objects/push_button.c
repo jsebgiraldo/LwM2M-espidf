@@ -28,6 +28,8 @@
 #include "objects.h"
 #include "sdkconfig.h"
 
+#define CONFIG_ANJAY_CLIENT_PUSH_BUTTON_PIN GPIO_NUM_9
+
 /**
  * Digital Input State: R, Single, Mandatory
  * type: boolean, range: N/A, unit: N/A
@@ -42,9 +44,7 @@
  */
 #define RID_DIGITAL_INPUT_COUNTER 5501
 
-#ifdef CONFIG_ANJAY_CLIENT_PUSH_BUTTON
-
-#    define BUTTON_IID 0
+#define BUTTON_IID 0
 
 typedef struct push_button_object_struct {
     const anjay_dm_object_def_t *def;
@@ -187,18 +187,4 @@ void push_button_object_update(anjay_t *anjay,
                                     RID_DIGITAL_INPUT_STATE);
     }
 }
-#else  // CONFIG_ANJAY_CLIENT_PUSH_BUTTON
-const anjay_dm_object_def_t **push_button_object_create(void) {
-    return NULL;
-}
 
-void push_button_object_release(const anjay_dm_object_def_t **def) {
-    (void) def;
-}
-
-void push_button_object_update(anjay_t *anjay,
-                               const anjay_dm_object_def_t *const *def) {
-    (void) anjay;
-    (void) def;
-}
-#endif // CONFIG_ANJAY_CLIENT_PUSH_BUTTON

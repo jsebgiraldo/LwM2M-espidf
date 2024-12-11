@@ -1,4 +1,6 @@
 #include "anjay_config.h"
+#include <openthread/thread.h>
+#include "esp_openthread.h"
 
 static int read_anjay_config(void) {
     int err = 0;
@@ -16,6 +18,11 @@ static void update_objects_job(avs_sched_t *sched, const void *anjay_ptr) {
     anjay_t *anjay = *(anjay_t *const *) anjay_ptr;
 
     device_object_update(anjay, DEVICE_OBJ);
+    sensors_update(anjay);
+
+    AVS_SCHED_DELAYED(sched, &sensors_job_handle,
+                    avs_time_duration_from_scalar(1, AVS_TIME_S),
+                    &update_objects_job, &anjay, sizeof(anjay));
 }
 
 static void update_connection_status_job(avs_sched_t *sched,
@@ -116,15 +123,30 @@ void anjay_init(void) {
         return;
     }
 
+    sensors_install(anjay);
 }
 
 void anjay_task(void *pvParameters) {
+
+    while (true) {
+        otDeviceRole role = otThreadGetDeviceRole(esp_openthread_get_instance());
+
+        if (role == OT_DEVICE_ROLE_CHILD || 
+            role == OT_DEVICE_ROLE_ROUTER || 
+            role == OT_DEVICE_ROLE_LEADER) {
+            break;
+        }
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+
 
     update_connection_status_job(anjay_get_scheduler(anjay), &anjay);
     update_objects_job(anjay_get_scheduler(anjay), &anjay);
 
     anjay_event_loop_run(anjay, avs_time_duration_from_scalar(1, AVS_TIME_S));
 
+    avs_sched_del(&sensors_job_handle);
     avs_sched_del(&connection_status_job_handle);
     anjay_delete(anjay);
+    sensors_release();
 }

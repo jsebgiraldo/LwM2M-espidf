@@ -8,5 +8,8 @@ set(sources
      "objects/sensors.c"
      "firmware_update.c")
 
+set(dirs
+     ".")
+
 idf_component_register(SRCS ${sources}
-                    INCLUDE_DIRS ".")
+                       INCLUDE_DIRS ${dirs})
